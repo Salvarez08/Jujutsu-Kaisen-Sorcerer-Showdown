@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,15 +8,19 @@ public class GameManager : MonoBehaviour
     [Header("Prefab de carta")]
     [SerializeField] private GameObject prefabCarta;
 
-    [Header("Botones")]
-    [SerializeField] private Button botonRobar;
-    [SerializeField] private Button botonDescartar;
-
-    [Header("Configuración")]
-    [SerializeField] private int cantidadCartasIniciales = 7;
-    [SerializeField] private float separacionCartas = 340f;
+    [Header("Configuración del mazo")]
+    [SerializeField] private int cantidadCartasIniciales = 5;
+    [SerializeField] private int cartasPorRonda = 5;
 
     private const int CantidadDeCartas = 30;
+
+    [Header("Distribución de la mano")]
+    [SerializeField] private float anchoMano = 8f;
+    [SerializeField] private float separacionMaxima = 1.5f;
+    [SerializeField] private float separacionMinima = 0.5f;
+    [SerializeField] private float desplazamientoSeleccion = 0.4f;
+
+    public static GameManager Instance { get; private set; }
 
     private int[] mazo = new int[CantidadDeCartas];
     private int[] mano = new int[CantidadDeCartas];
@@ -28,38 +31,110 @@ public class GameManager : MonoBehaviour
     private int cantidadDescarte;
 
     private GameObject[] cartasVisibles = new GameObject[CantidadDeCartas];
+
     private int cartaSeleccionada = -1;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
 
     private void Start()
     {
-        // Inicializar mazo: cada carta tiene un ID único (0..29)
-        cantidadMazo = CantidadDeCartas;
-        for (int idCarta = 0; idCarta < CantidadDeCartas; idCarta++)
-            mazo[idCarta] = idCarta;
+        IniciarPartida();
+    }
+
+    // ============================================================
+    //  API PÚBLICA PARA REINICIAR
+    // ============================================================
+
+    /// <summary>
+    /// Reinicia todo: mazo mezclado, mano vacía, descarte vacío
+    /// y reparte las cartas iniciales. No recarga la escena.
+    /// </summary>
+    public void IniciarPartida()
+    {
+        InicializarMazo();
+        RepartirManoInicial();
+    }
+
+    /// <summary>
+    /// Solo reinicia el mazo con las cartas actuales (mano + descarte),
+    /// sin repartir. Útil para "barajar de nuevo" sin empezar partida.
+    /// </summary>
+    public void BarajarTodo()
+    {
+        // Juntar mano + descarte + lo que quede en mazo en un solo array
+        int total = cantidadMano + cantidadDescarte + cantidadMazo;
+        int[] todas = new int[total];
+        int indice = 0;
+
+        for (int i = 0; i < cantidadMano; i++) todas[indice++] = mano[i];
+        for (int i = 0; i < cantidadDescarte; i++) todas[indice++] = descarte[i];
+        for (int i = 0; i < cantidadMazo; i++) todas[indice++] = mazo[i];
+
+        // Volver a llenar el mazo
+        for (int i = 0; i < total; i++)
+            mazo[i] = todas[i];
+
+        cantidadMazo = total;
+        cantidadMano = 0;
+        cantidadDescarte = 0;
+        cartaSeleccionada = -1;
 
         MezclarMazo();
+        ActualizarCartas();
+    }
 
-        if (botonRobar != null) botonRobar.onClick.AddListener(RobarCarta);
-        if (botonDescartar != null) botonDescartar.onClick.AddListener(DescartarSeleccionada);
+    // ============================================================
+    //  INICIALIZACIÓN
+    // ============================================================
 
-        for (int n = 0; n < cantidadCartasIniciales; n++)
+    private void InicializarMazo()
+    {
+        cantidadMazo = CantidadDeCartas;
+        cantidadMano = 0;
+        cantidadDescarte = 0;
+        cartaSeleccionada = -1;
+
+        for (int i = 0; i < CantidadDeCartas; i++)
+            mazo[i] = i;
+
+        MezclarMazo();
+    }
+
+    private void RepartirManoInicial()
+    {
+        for (int i = 0; i < cantidadCartasIniciales; i++)
             RobarCarta();
     }
 
+    // ============================================================
+    //  LÓGICA DE MAZO / MANO / DESCARTE
+    // ============================================================
+
     private void MezclarMazo()
     {
-        for (int posicionActual = cantidadMazo - 1; posicionActual > 0; posicionActual--)
+        for (int i = cantidadMazo - 1; i > 0; i--)
         {
-            int posicionAleatoria = Random.Range(0, posicionActual + 1);
-            (mazo[posicionActual], mazo[posicionAleatoria]) =
-            (mazo[posicionAleatoria], mazo[posicionActual]);
+            int aleatorio = Random.Range(0, i + 1);
+            (mazo[i], mazo[aleatorio]) = (mazo[aleatorio], mazo[i]);
         }
     }
 
     public void RobarCarta()
     {
-        if (cantidadMazo == 0) RecuperarDescarte();
-        if (cantidadMazo == 0 || cantidadMano >= CantidadDeCartas) return;
+        if (cantidadMazo == 0)
+            RecuperarDescarte();
+
+        if (cantidadMazo == 0 || cantidadMano >= CantidadDeCartas)
+            return;
 
         mano[cantidadMano++] = mazo[--cantidadMazo];
         ActualizarCartas();
@@ -67,99 +142,148 @@ public class GameManager : MonoBehaviour
 
     public void DescartarSeleccionada()
     {
-        if (cartaSeleccionada < 0 || cartaSeleccionada >= cantidadMano || cantidadDescarte >= CantidadDeCartas)
+        if (cartaSeleccionada < 0 ||
+            cartaSeleccionada >= cantidadMano ||
+            cantidadDescarte >= CantidadDeCartas)
             return;
 
         descarte[cantidadDescarte++] = mano[cartaSeleccionada];
 
-        // Compactar la mano moviendo cada carta una posición a la izquierda
-        for (int posicion = cartaSeleccionada; posicion < cantidadMano - 1; posicion++)
-            mano[posicion] = mano[posicion + 1];
+        for (int i = cartaSeleccionada; i < cantidadMano - 1; i++)
+            mano[i] = mano[i + 1];
 
         cantidadMano--;
         cartaSeleccionada = -1;
+
         ActualizarCartas();
     }
 
     private void RecuperarDescarte()
     {
-        if (cantidadDescarte == 0) return;
+        if (cantidadDescarte == 0)
+            return;
 
-        for (int posicion = 0; posicion < cantidadDescarte; posicion++)
-            mazo[posicion] = descarte[posicion];
+        for (int i = 0; i < cantidadDescarte; i++)
+            mazo[i] = descarte[i];
 
         cantidadMazo = cantidadDescarte;
         cantidadDescarte = 0;
+
         MezclarMazo();
     }
 
+    // ============================================================
+    //  VISUAL
+    // ============================================================
+
     private void ActualizarCartas()
     {
-        for (int indice = 0; indice < cartasVisibles.Length; indice++)
+        for (int i = 0; i < cartasVisibles.Length; i++)
         {
-            if (cartasVisibles[indice] != null) Destroy(cartasVisibles[indice]);
-            cartasVisibles[indice] = null;
+            if (cartasVisibles[i] != null)
+                Destroy(cartasVisibles[i]);
+
+            cartasVisibles[i] = null;
         }
 
-        if (prefabCarta == null || contenedorMano == null) return;
+        if (prefabCarta == null || contenedorMano == null)
+        {
+            Debug.LogWarning("GameManager: asigna el prefab y el contenedor de la mano.");
+            return;
+        }
 
-        for (int indiceCarta = 0; indiceCarta < cantidadMano; indiceCarta++)
+        for (int i = 0; i < cantidadMano; i++)
         {
             GameObject carta = Instantiate(prefabCarta, contenedorMano);
-            cartasVisibles[indiceCarta] = carta;
-            carta.name = "Carta_" + indiceCarta;
 
-            if (carta.TryGetComponent<RectTransform>(out var rect))
-            {
-                rect.sizeDelta = new Vector2(100f, 150f);
-                rect.anchoredPosition = new Vector2(
-                    CalcularPosicionX(indiceCarta), 0f);
-            }
+            cartasVisibles[i] = carta;
+            carta.name = "Carta_" + i;
 
-            if (carta.TryGetComponent<Button>(out var botonCarta))
-            {
-                int indiceCapturado = indiceCarta; // evita el bug de closure
-                botonCarta.onClick.RemoveAllListeners();
-                botonCarta.onClick.AddListener(() => SeleccionarCarta(indiceCapturado));
-            }
+            if (carta.TryGetComponent<Carta>(out var scriptCarta))
+                scriptCarta.indiceEnMano = i;
 
-            if (carta.TryGetComponent<Image>(out var imagen))
-                imagen.color = Color.white;
+            if (carta.TryGetComponent<SpriteRenderer>(out var spriteRenderer))
+                spriteRenderer.sortingOrder = i;
         }
 
         ActualizarSeleccionVisual();
     }
 
-    private void SeleccionarCarta(int indice)
+    public void SeleccionarCarta(int indice)
     {
-        if (indice < 0 || indice >= cantidadMano) return;
+        if (indice < 0 || indice >= cantidadMano)
+            return;
+
         cartaSeleccionada = indice;
         ActualizarSeleccionVisual();
     }
 
     private void ActualizarSeleccionVisual()
     {
-        for (int indiceCarta = 0; indiceCarta < cantidadMano; indiceCarta++)
+        if (contenedorMano == null)
+            return;
+
+        for (int i = 0; i < cantidadMano; i++)
         {
-            if (cartasVisibles[indiceCarta] == null) continue;
-            if (cartasVisibles[indiceCarta].TryGetComponent<RectTransform>(out var rect))
-            {
-                rect.anchoredPosition = new Vector2(
-                    CalcularPosicionX(indiceCarta),
-                    indiceCarta == cartaSeleccionada ? 30f : 0f);
-            }
+            if (cartasVisibles[i] == null)
+                continue;
+
+            cartasVisibles[i].transform.localPosition = new Vector3(
+                CalcularPosicionX(i),
+                i == cartaSeleccionada ? desplazamientoSeleccion : 0f,
+                0f
+            );
         }
     }
 
-    // Calcula la posición X centrada de una carta según su índice en la mano
     private float CalcularPosicionX(int indiceCarta)
     {
-        return (indiceCarta - (cantidadMano - 1) / 2f) * separacionCartas;
+        if (cantidadMano <= 1)
+            return 0f;
+
+        float separacion = Mathf.Clamp(
+            anchoMano / (cantidadMano - 1),
+            separacionMinima,
+            separacionMaxima
+        );
+
+        return (indiceCarta - (cantidadMano - 1) / 2f) * separacion;
+    }
+
+    // ============================================================
+    //  RONDAS
+    // ============================================================
+
+    public void TerminarRonda()
+    {
+        if (cantidadMano == 0)
+            return;
+
+        for (int i = 0; i < cantidadMano; i++)
+        {
+            if (cantidadDescarte >= CantidadDeCartas)
+                break;
+
+            descarte[cantidadDescarte++] = mano[i];
+        }
+
+        cantidadMano = 0;
+        cartaSeleccionada = -1;
+
+        ActualizarCartas();
+
+        for (int i = 0; i < cartasPorRonda; i++)
+        {
+            RobarCarta();
+
+            if (cantidadMano >= cartasPorRonda)
+                break;
+        }
     }
 
     private void OnDestroy()
     {
-        if (botonRobar != null) botonRobar.onClick.RemoveListener(RobarCarta);
-        if (botonDescartar != null) botonDescartar.onClick.RemoveListener(DescartarSeleccionada);
+        if (Instance == this)
+            Instance = null;
     }
 }
