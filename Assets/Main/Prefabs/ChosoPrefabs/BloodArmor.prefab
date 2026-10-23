@@ -376,6 +376,8 @@ GameObject:
   - component: {fileID: 4525390764123808188}
   - component: {fileID: 2087852611903345168}
   - component: {fileID: 3319519669347429106}
+  - component: {fileID: 1856802025666068558}
+  - component: {fileID: 5828929994600812645}
   m_Layer: 0
   m_Name: BloodArmor
   m_TagString: Untagged
@@ -391,9 +393,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2078143138976734461}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.5586197, y: 1.721353, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_LocalScale: {x: 0.4277063, y: 0.4277063, z: 0.4277063}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5009203853788103077}
@@ -427,7 +429,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!61 &3319519669347429106
@@ -476,6 +478,32 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 5.0236797, y: 6.971281}
   m_EdgeRadius: 0
+--- !u!114 &1856802025666068558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078143138976734461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b11c0b6a835ea6f4981f19e7b22ad87e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Carta
+  indiceEnMano: 0
+--- !u!114 &5828929994600812645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078143138976734461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b11c0b6a835ea6f4981f19e7b22ad87e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Carta
+  indiceEnMano: 0
 --- !u!1 &3045962195354092201
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +538,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -4.81, y: 0.54}
+  m_AnchoredPosition: {x: -4.76, y: 0.54}
   m_SizeDelta: {x: 5.2244, y: 6.012}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &7320149983622856561
@@ -923,12 +951,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -8728034284175163146, guid: 79a450b0d3891604f95c43695e810261, type: 3}
+  m_Sprite: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 7.5, y: 10.39}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
