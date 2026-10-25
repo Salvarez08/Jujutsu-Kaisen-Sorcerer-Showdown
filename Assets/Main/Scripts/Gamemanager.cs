@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float separacionMinima = 0.5f;
     [SerializeField] private float desplazamientoSeleccion = 0.4f;
 
+    [Header("Escala de Selección")]
+    [SerializeField] private Vector3 escalaNormal = Vector3.one;
+    [SerializeField] private Vector3 escalaSeleccionada = new Vector3(1.2f, 1.2f, 1f); // Modifica estos valores según el tamaño que prefieras
+
     public static GameManager Instance { get; private set; }
 
     private int[] mazo = new int[CantidadDeCartas];
@@ -54,23 +58,14 @@ public class GameManager : MonoBehaviour
     //  API PÚBLICA PARA REINICIAR
     // ============================================================
 
-    /// <summary>
-    /// Reinicia todo: mazo mezclado, mano vacía, descarte vacío
-    /// y reparte las cartas iniciales. No recarga la escena.
-    /// </summary>
     public void IniciarPartida()
     {
         InicializarMazo();
         RepartirManoInicial();
     }
 
-    /// <summary>
-    /// Solo reinicia el mazo con las cartas actuales (mano + descarte),
-    /// sin repartir. Útil para "barajar de nuevo" sin empezar partida.
-    /// </summary>
     public void BarajarTodo()
     {
-        // Juntar mano + descarte + lo que quede en mazo en un solo array
         int total = cantidadMano + cantidadDescarte + cantidadMazo;
         int[] todas = new int[total];
         int indice = 0;
@@ -79,7 +74,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < cantidadDescarte; i++) todas[indice++] = descarte[i];
         for (int i = 0; i < cantidadMazo; i++) todas[indice++] = mazo[i];
 
-        // Volver a llenar el mazo
         for (int i = 0; i < total; i++)
             mazo[i] = todas[i];
 
@@ -228,11 +222,17 @@ public class GameManager : MonoBehaviour
             if (cartasVisibles[i] == null)
                 continue;
 
+            bool esSeleccionada = (i == cartaSeleccionada);
+
+            // Ajustar la posición (arriba si está seleccionada, normal si no)
             cartasVisibles[i].transform.localPosition = new Vector3(
                 CalcularPosicionX(i),
-                i == cartaSeleccionada ? desplazamientoSeleccion : 0f,
+                esSeleccionada ? desplazamientoSeleccion : 0f,
                 0f
             );
+
+            // Ajustar la escala para que se vea más grande o en su tamaño original
+            cartasVisibles[i].transform.localScale = esSeleccionada ? escalaSeleccionada : escalaNormal;
         }
     }
 
