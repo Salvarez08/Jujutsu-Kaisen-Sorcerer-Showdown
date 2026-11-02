@@ -1,31 +1,20 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Contenedor de la mano")]
-    [SerializeField] private Transform contenedorMano;
-
-    [Header("Prefab de carta")]
-    [SerializeField] private GameObject prefabCarta;
-
     [Header("Configuración del mazo")]
     [SerializeField] private int cantidadCartasIniciales = 5;
     [SerializeField] private int cartasPorRonda = 5;
 
     private const int CantidadDeCartas = 30;
 
-    [Header("Distribución de la mano")]
-    [SerializeField] private float anchoMano = 8f;
-    [SerializeField] private float separacionMaxima = 1.5f;
-    [SerializeField] private float separacionMinima = 0.5f;
-    [SerializeField] private float desplazamientoSeleccion = 0.4f;
-
-    [Header("Escala de Selección")]
-    [SerializeField] private Vector3 escalaNormal = Vector3.one;
-    [SerializeField] private Vector3 escalaSeleccionada = new Vector3(1.2f, 1.2f, 1f); // Modifica estos valores según el tamaño que prefieras
-
     public static GameManager Instance { get; private set; }
+
+    // Eventos para que la interfaz se actualice
+    public static event Action OnManoCambio;       // cambió la mano, el mazo o el descarte
+    public static event Action OnSeleccionCambio;  // cambió solo la carta seleccionada
 
     private int[] mazo = new int[CantidadDeCartas];
     private int[] mano = new int[CantidadDeCartas];
@@ -35,9 +24,19 @@ public class GameManager : MonoBehaviour
     private int cantidadMano;
     private int cantidadDescarte;
 
-    private GameObject[] cartasVisibles = new GameObject[CantidadDeCartas];
-
     private int cartaSeleccionada = -1;
+
+    // Lectura del estado (para la interfaz)
+    public int CantidadMazo => cantidadMazo;
+    public int CantidadMano => cantidadMano;
+    public int CantidadDescarte => cantidadDescarte;
+    public int CartaSeleccionada => cartaSeleccionada;
+
+    // Número de carta (0 a 29) que hay en una posición de la mano
+    public int IdCartaEnMano(int indice)
+    {
+        return mano[indice];
+    }
 
     private void Awake()
     {
@@ -52,17 +51,38 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        if (Instance != this)
+            return;
+
         IniciarPartida();
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     // ============================================================
-    //  API PÚBLICA PARA REINICIAR
+    //  API PÚBLICA (botones y otros scripts)
     // ============================================================
 
     public void IniciarPartida()
     {
-        InicializarMazo();
-        RepartirManoInicial();
+        cantidadMazo = CantidadDeCartas;
+        cantidadMano = 0;
+        cantidadDescarte = 0;
+        cartaSeleccionada = -1;
+
+        for (int i = 0; i < CantidadDeCartas; i++)
+            mazo[i] = i;
+
+        MezclarMazo();
+
+        for (int i = 0; i < cantidadCartasIniciales; i++)
+            RobarInterno();
+
+        OnManoCambio?.Invoke();
     }
 
     public void BarajarTodo()
@@ -84,55 +104,22 @@ public class GameManager : MonoBehaviour
         cartaSeleccionada = -1;
 
         MezclarMazo();
-        ActualizarCartas();
-    }
-
-    // ============================================================
-    //  INICIALIZACIÓN
-    // ============================================================
-
-    private void InicializarMazo()
-    {
-        cantidadMazo = CantidadDeCartas;
-        cantidadMano = 0;
-        cantidadDescarte = 0;
-        cartaSeleccionada = -1;
-
-        for (int i = 0; i < CantidadDeCartas; i++)
-            mazo[i] = i;
-
-        MezclarMazo();
-    }
-
-    private void RepartirManoInicial()
-    {
-        for (int i = 0; i < cantidadCartasIniciales; i++)
-            RobarCarta();
-    }
-
-    // ============================================================
-    //  LÓGICA DE MAZO / MANO / DESCARTE
-    // ============================================================
-
-    private void MezclarMazo()
-    {
-        for (int i = cantidadMazo - 1; i > 0; i--)
-        {
-            int aleatorio = Random.Range(0, i + 1);
-            (mazo[i], mazo[aleatorio]) = (mazo[aleatorio], mazo[i]);
-        }
+        OnManoCambio?.Invoke();
     }
 
     public void RobarCarta()
     {
-        if (cantidadMazo == 0)
-            RecuperarDescarte();
+        RobarInterno();
+        OnManoCambio?.Invoke();
+    }
 
-        if (cantidadMazo == 0 || cantidadMano >= CantidadDeCartas)
+    public void SeleccionarCarta(int indice)
+    {
+        if (indice < 0 || indice >= cantidadMano)
             return;
 
-        mano[cantidadMano++] = mazo[--cantidadMazo];
-        ActualizarCartas();
+        cartaSeleccionada = indice;
+        OnSeleccionCambio?.Invoke();
     }
 
     public void DescartarSeleccionada()
@@ -150,110 +137,8 @@ public class GameManager : MonoBehaviour
         cantidadMano--;
         cartaSeleccionada = -1;
 
-        ActualizarCartas();
+        OnManoCambio?.Invoke();
     }
-
-    private void RecuperarDescarte()
-    {
-        if (cantidadDescarte == 0)
-            return;
-
-        for (int i = 0; i < cantidadDescarte; i++)
-            mazo[i] = descarte[i];
-
-        cantidadMazo = cantidadDescarte;
-        cantidadDescarte = 0;
-
-        MezclarMazo();
-    }
-
-    // ============================================================
-    //  VISUAL
-    // ============================================================
-
-    private void ActualizarCartas()
-    {
-        for (int i = 0; i < cartasVisibles.Length; i++)
-        {
-            if (cartasVisibles[i] != null)
-                Destroy(cartasVisibles[i]);
-
-            cartasVisibles[i] = null;
-        }
-
-        if (prefabCarta == null || contenedorMano == null)
-        {
-            Debug.LogWarning("GameManager: asigna el prefab y el contenedor de la mano.");
-            return;
-        }
-
-        for (int i = 0; i < cantidadMano; i++)
-        {
-            GameObject carta = Instantiate(prefabCarta, contenedorMano);
-
-            cartasVisibles[i] = carta;
-            carta.name = "Carta_" + i;
-
-            if (carta.TryGetComponent<Carta>(out var scriptCarta))
-                scriptCarta.indiceEnMano = i;
-
-            if (carta.TryGetComponent<SpriteRenderer>(out var spriteRenderer))
-                spriteRenderer.sortingOrder = i;
-        }
-
-        ActualizarSeleccionVisual();
-    }
-
-    public void SeleccionarCarta(int indice)
-    {
-        if (indice < 0 || indice >= cantidadMano)
-            return;
-
-        cartaSeleccionada = indice;
-        ActualizarSeleccionVisual();
-    }
-
-    private void ActualizarSeleccionVisual()
-    {
-        if (contenedorMano == null)
-            return;
-
-        for (int i = 0; i < cantidadMano; i++)
-        {
-            if (cartasVisibles[i] == null)
-                continue;
-
-            bool esSeleccionada = (i == cartaSeleccionada);
-
-            // Ajustar la posición (arriba si está seleccionada, normal si no)
-            cartasVisibles[i].transform.localPosition = new Vector3(
-                CalcularPosicionX(i),
-                esSeleccionada ? desplazamientoSeleccion : 0f,
-                0f
-            );
-
-            // Ajustar la escala para que se vea más grande o en su tamaño original
-            cartasVisibles[i].transform.localScale = esSeleccionada ? escalaSeleccionada : escalaNormal;
-        }
-    }
-
-    private float CalcularPosicionX(int indiceCarta)
-    {
-        if (cantidadMano <= 1)
-            return 0f;
-
-        float separacion = Mathf.Clamp(
-            anchoMano / (cantidadMano - 1),
-            separacionMinima,
-            separacionMaxima
-        );
-
-        return (indiceCarta - (cantidadMano - 1) / 2f) * separacion;
-    }
-
-    // ============================================================
-    //  RONDAS
-    // ============================================================
 
     public void TerminarRonda()
     {
@@ -271,25 +156,56 @@ public class GameManager : MonoBehaviour
         cantidadMano = 0;
         cartaSeleccionada = -1;
 
-        ActualizarCartas();
-
         for (int i = 0; i < cartasPorRonda; i++)
         {
-            RobarCarta();
-
-            if (cantidadMano >= cartasPorRonda)
+            if (!RobarInterno())
                 break;
         }
-    }
 
-    private void OnDestroy()
-    {
-        if (Instance == this)
-            Instance = null;
+        OnManoCambio?.Invoke();
     }
 
     public void LoadScene(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
+    }
+
+    // ============================================================
+    //  MECÁNICAS INTERNAS
+    // ============================================================
+
+    private bool RobarInterno()
+    {
+        if (cantidadMazo == 0)
+            RecuperarDescarte();
+
+        if (cantidadMazo == 0 || cantidadMano >= CantidadDeCartas)
+            return false;
+
+        mano[cantidadMano++] = mazo[--cantidadMazo];
+        return true;
+    }
+
+    private void RecuperarDescarte()
+    {
+        if (cantidadDescarte == 0)
+            return;
+
+        for (int i = 0; i < cantidadDescarte; i++)
+            mazo[i] = descarte[i];
+
+        cantidadMazo = cantidadDescarte;
+        cantidadDescarte = 0;
+
+        MezclarMazo();
+    }
+
+    private void MezclarMazo()
+    {
+        for (int i = cantidadMazo - 1; i > 0; i--)
+        {
+            int aleatorio = UnityEngine.Random.Range(0, i + 1);
+            (mazo[i], mazo[aleatorio]) = (mazo[aleatorio], mazo[i]);
+        }
     }
 }

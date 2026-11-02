@@ -1,8 +1,8 @@
 <!-- UNITY CODE ASSIST INSTRUCTIONS START -->
-- Project name: Jujutsu Kaisen Sorcerer Showdown
+- Project name: Jujutsu-Kaisen-Sorcerer-Showdown
 - Unity version: Unity 6000.3.9f1
 - Active game object:
-  - Name: GameManager
+  - Name: Carta Prefab Base
   - Tag: Untagged
   - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
