@@ -10,11 +10,7 @@ public class PanelManager : MonoBehaviour
 
     private void Start()
     {
-        // Al iniciar el juego, todos los paneles estarán ocultos.
-        panelScreen.SetActive(false);
-        panelSound.SetActive(false);
-        panelControls.SetActive(false);
-        panelAccounts.SetActive(false);
+        HideAllPanels();
     }
 
     public void ShowScreen()
@@ -39,6 +35,12 @@ public class PanelManager : MonoBehaviour
     {
         HideAllPanels();
         panelAccounts.SetActive(true);
+    }
+
+    
+    public void Back()
+    {
+        HideAllPanels();
     }
 
     private void HideAllPanels()
