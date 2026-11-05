@@ -175,9 +175,9 @@ public class GameManager : MonoBehaviour
             if (!RobarInterno()) break;
         }
 
-        // Si quieres que la energía se recargue cada ronda, descomenta:
-        // energiaActual = energiaMaxima;
-        // OnEnergiaCambio?.Invoke();
+        
+        energiaActual = energiaMaxima;
+        OnEnergiaCambio?.Invoke();
 
         OnManoCambio?.Invoke();
     }
