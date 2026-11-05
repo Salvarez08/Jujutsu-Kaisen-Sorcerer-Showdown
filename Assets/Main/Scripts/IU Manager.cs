@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     [Header("Prefab y contenedor")]
     [SerializeField] private Transform contenedorMano;
     [SerializeField] private GameObject prefabCarta;
-
-    [Header("Datos de las 30 cartas")]
     [SerializeField] private BaseDeCartas baseDeCartas;
 
     [Header("Distribución de la mano")]
@@ -29,29 +28,31 @@ public class UIManager : MonoBehaviour
     [SerializeField] private int ordenSeleccionada = 100;
     [SerializeField] private int ordenTextoSobreSprite = 5;
 
-    private readonly List<GameObject> cartas = new List<GameObject>();
+    [Header("Energía maldita")]
+    [SerializeField] private TMP_Text textoEnergia;
 
-    // ============================================================
-    //  CONEXIÓN CON EL GAMEMANAGER
-    // ============================================================
+
+    private readonly List<GameObject> cartas = new List<GameObject>();
 
     private void OnEnable()
     {
         GameManager.OnManoCambio += RedibujarMano;
         GameManager.OnSeleccionCambio += Distribuir;
+        GameManager.OnEnergiaCambio += ActualizarEnergia;
+
+        ActualizarEnergia(); // por si el GameManager ya arrancó
     }
 
     private void OnDisable()
     {
         GameManager.OnManoCambio -= RedibujarMano;
         GameManager.OnSeleccionCambio -= Distribuir;
+        GameManager.OnEnergiaCambio -= ActualizarEnergia;
     }
-
     private void RedibujarMano()
     {
         GameManager gm = GameManager.Instance;
-        if (gm == null)
-            return;
+        if (gm == null) return;
 
         if (prefabCarta == null || contenedorMano == null)
         {
@@ -59,12 +60,12 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        foreach (GameObject c in cartas)
+        // for en lugar de foreach (List<T> foreach asigna enumerador)
+        for (int i = 0; i < cartas.Count; i++)
         {
-            if (c != null)
-                Destroy(c);
+            if (cartas[i] != null)
+                Destroy(cartas[i]);
         }
-
         cartas.Clear();
 
         for (int i = 0; i < gm.CantidadMano; i++)
@@ -78,7 +79,6 @@ public class UIManager : MonoBehaviour
 
             carta.Inicializar(i, this);
 
-            // La posición i de la mano es la carta número "id": ponle sus datos
             int id = gm.IdCartaEnMano(i);
             DatosCarta datos = ObtenerDatos(id);
 
@@ -87,40 +87,37 @@ public class UIManager : MonoBehaviour
                 vista.Configurar(datos);
 
             AsegurarCollider(obj);
-
             cartas.Add(obj);
         }
 
         Distribuir();
     }
 
-    // ============================================================
-    //  CLIC DESDE UNA CARTA
-    // ============================================================
-
     public void AlClickear(int indice)
     {
-        if (GameManager.Instance != null)
-            GameManager.Instance.SeleccionarCarta(indice);
+        GameManager.Instance?.SeleccionarCarta(indice);
     }
 
-    // ============================================================
-    //  DISTRIBUCIÓN
-    // ============================================================
+    private void ActualizarEnergia()
+    {
+        GameManager gm = GameManager.Instance;
+        if (gm == null || textoEnergia == null) return;
+
+        textoEnergia.text = gm.EnergiaActual + " / " + gm.EnergiaMaxima;
+    }
 
     private void Distribuir()
     {
         GameManager gm = GameManager.Instance;
-        if (gm == null)
-            return;
+        if (gm == null) return;
 
         int cantidad = cartas.Count;
         int seleccionada = gm.CartaSeleccionada;
 
         for (int i = 0; i < cantidad; i++)
         {
-            if (cartas[i] == null)
-                continue;
+            GameObject carta = cartas[i];
+            if (carta == null) continue;
 
             bool esSeleccionada = (i == seleccionada);
 
@@ -137,20 +134,18 @@ public class UIManager : MonoBehaviour
                 escala = escalaSeleccionada;
             }
 
-            Transform tr = cartas[i].transform;
+            Transform tr = carta.transform;
             tr.localPosition = new Vector3(x, y, 0f);
             tr.localRotation = Quaternion.Euler(0f, 0f, angulo);
             tr.localScale = escala;
 
-            int orden = esSeleccionada ? ordenSeleccionada : ordenBase + i;
-            AplicarOrdenDeDibujo(cartas[i], orden);
+            AplicarOrdenDeDibujo(carta, esSeleccionada ? ordenSeleccionada : ordenBase + i);
         }
     }
 
     private float CalcularPosicionX(int indiceCarta, int cantidad)
     {
-        if (cantidad <= 1)
-            return 0f;
+        if (cantidad <= 1) return 0f;
 
         float separacion = Mathf.Clamp(
             anchoMano / (cantidad - 1),
@@ -161,30 +156,22 @@ public class UIManager : MonoBehaviour
         return (indiceCarta - (cantidad - 1) / 2f) * separacion;
     }
 
-    // Sprites en el orden base de la carta; textos (TMP) y Canvas siempre por encima
     private void AplicarOrdenDeDibujo(GameObject carta, int orden)
     {
         int ordenSprite = orden * 10;
         int ordenTexto = ordenSprite + ordenTextoSobreSprite;
 
-        foreach (Renderer r in carta.GetComponentsInChildren<Renderer>(true))
-        {
-            if (r is SpriteRenderer)
-                r.sortingOrder = ordenSprite;
-            else
-                r.sortingOrder = ordenTexto;
-        }
+        Renderer[] renderers = carta.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+            renderers[i].sortingOrder = (renderers[i] is SpriteRenderer) ? ordenSprite : ordenTexto;
 
-        foreach (Canvas canvas in carta.GetComponentsInChildren<Canvas>(true))
+        Canvas[] canvases = carta.GetComponentsInChildren<Canvas>(true);
+        for (int i = 0; i < canvases.Length; i++)
         {
-            canvas.overrideSorting = true;
-            canvas.sortingOrder = ordenTexto;
+            canvases[i].overrideSorting = true;
+            canvases[i].sortingOrder = ordenTexto;
         }
     }
-
-    // ============================================================
-    //  DATOS Y COLLIDER
-    // ============================================================
 
     private DatosCarta ObtenerDatos(int id)
     {
@@ -198,8 +185,7 @@ public class UIManager : MonoBehaviour
 
     private void AsegurarCollider(GameObject carta)
     {
-        if (carta.GetComponentInChildren<Collider2D>() != null)
-            return;
+        if (carta.GetComponentInChildren<Collider2D>() != null) return;
 
         SpriteRenderer sr = carta.GetComponentInChildren<SpriteRenderer>();
         if (sr != null)
