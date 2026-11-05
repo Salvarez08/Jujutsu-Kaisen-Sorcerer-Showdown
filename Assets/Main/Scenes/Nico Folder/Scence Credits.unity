@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47619bf790672cf4c8fb177ddd75a774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  sceneName: Nicolas
+  sceneName: SegundaEscena
 --- !u!4 &44568474
 Transform:
   m_ObjectHideFlags: 0
