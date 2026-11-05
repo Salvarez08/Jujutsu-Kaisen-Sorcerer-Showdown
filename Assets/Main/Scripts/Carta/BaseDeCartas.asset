@@ -20,7 +20,7 @@ MonoBehaviour:
       Retain.
 
       Gain 4 block X times.'
-    energia: X
+    energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
     copias: x3 choso
   - nombre: 'Blood Armor '
@@ -30,7 +30,7 @@ MonoBehaviour:
       Retain.
 
       Gain 4 block X times.'
-    energia: X
+    energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
     copias: x3 choso
   - nombre: 'Blood Armor '
@@ -40,7 +40,7 @@ MonoBehaviour:
       Retain.
 
       Gain 4 block X times.'
-    energia: X
+    energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
     copias: x3 choso
   - nombre: Blood Edge
@@ -172,7 +172,7 @@ MonoBehaviour:
     descripcion: 'Gain EC.
 
       Discard 2 cards.'
-    energia: 5
+    energia: 0
     fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
     copias: x3 choso
   - nombre: The eldest brother
@@ -180,7 +180,7 @@ MonoBehaviour:
     descripcion: 'Gain EC.
 
       Discard 2 cards.'
-    energia: 5
+    energia: 0
     fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
     copias: x3 choso
   - nombre: The eldest brother
@@ -188,7 +188,7 @@ MonoBehaviour:
     descripcion: 'Gain EC.
 
       Discard 2 cards.'
-    energia: 5
+    energia: 0
     fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
     copias: x3 choso
   - nombre: Supernova

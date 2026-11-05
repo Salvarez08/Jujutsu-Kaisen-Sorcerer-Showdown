@@ -8,35 +8,39 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int cantidadCartasIniciales = 5;
     [SerializeField] private int cartasPorRonda = 5;
 
+    [Header("Energía")]
+    [SerializeField] private BaseDeCartas baseDeCartas;
+    [SerializeField] private int energiaMaxima = 5;
+
     private const int CantidadDeCartas = 30;
 
     public static GameManager Instance { get; private set; }
 
-    // Eventos para que la interfaz se actualice
-    public static event Action OnManoCambio;       // cambió la mano, el mazo o el descarte
-    public static event Action OnSeleccionCambio;  // cambió solo la carta seleccionada
+    public static event Action OnManoCambio;
+    public static event Action OnSeleccionCambio;
+    public static event Action OnEnergiaCambio;
 
-    private int[] mazo = new int[CantidadDeCartas];
-    private int[] mano = new int[CantidadDeCartas];
-    private int[] descarte = new int[CantidadDeCartas];
+    private readonly int[] mazo = new int[CantidadDeCartas];
+    private readonly int[] mano = new int[CantidadDeCartas];
+    private readonly int[] descarte = new int[CantidadDeCartas];
+    // Buffer reutilizable para evitar allocations en BarajarTodo
+    private readonly int[] bufferBarajar = new int[CantidadDeCartas];
 
     private int cantidadMazo;
     private int cantidadMano;
     private int cantidadDescarte;
 
     private int cartaSeleccionada = -1;
+    private int energiaActual;
 
-    // Lectura del estado (para la interfaz)
     public int CantidadMazo => cantidadMazo;
     public int CantidadMano => cantidadMano;
     public int CantidadDescarte => cantidadDescarte;
     public int CartaSeleccionada => cartaSeleccionada;
+    public int EnergiaActual => energiaActual;
+    public int EnergiaMaxima => energiaMaxima;
 
-    // Número de carta (0 a 29) que hay en una posición de la mano
-    public int IdCartaEnMano(int indice)
-    {
-        return mano[indice];
-    }
+    public int IdCartaEnMano(int indice) => mano[indice];
 
     private void Awake()
     {
@@ -45,27 +49,19 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
     }
 
     private void Start()
     {
-        if (Instance != this)
-            return;
-
+        if (Instance != this) return;
         IniciarPartida();
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
-            Instance = null;
+        if (Instance == this) Instance = null;
     }
-
-    // ============================================================
-    //  API PÚBLICA (botones y otros scripts)
-    // ============================================================
 
     public void IniciarPartida()
     {
@@ -73,6 +69,7 @@ public class GameManager : MonoBehaviour
         cantidadMano = 0;
         cantidadDescarte = 0;
         cartaSeleccionada = -1;
+        energiaActual = energiaMaxima;
 
         for (int i = 0; i < CantidadDeCartas; i++)
             mazo[i] = i;
@@ -83,20 +80,18 @@ public class GameManager : MonoBehaviour
             RobarInterno();
 
         OnManoCambio?.Invoke();
+        OnEnergiaCambio?.Invoke();
     }
 
     public void BarajarTodo()
     {
         int total = cantidadMano + cantidadDescarte + cantidadMazo;
-        int[] todas = new int[total];
-        int indice = 0;
 
-        for (int i = 0; i < cantidadMano; i++) todas[indice++] = mano[i];
-        for (int i = 0; i < cantidadDescarte; i++) todas[indice++] = descarte[i];
-        for (int i = 0; i < cantidadMazo; i++) todas[indice++] = mazo[i];
-
-        for (int i = 0; i < total; i++)
-            mazo[i] = todas[i];
+        // Array.Copy es memcpy interno: mucho más rápido que bucles manuales
+        Array.Copy(mano, 0, bufferBarajar, 0, cantidadMano);
+        Array.Copy(descarte, 0, bufferBarajar, cantidadMano, cantidadDescarte);
+        Array.Copy(mazo, 0, bufferBarajar, cantidadMano + cantidadDescarte, cantidadMazo);
+        Array.Copy(bufferBarajar, 0, mazo, 0, total);
 
         cantidadMazo = total;
         cantidadMano = 0;
@@ -115,13 +110,30 @@ public class GameManager : MonoBehaviour
 
     public void SeleccionarCarta(int indice)
     {
-        if (indice < 0 || indice >= cantidadMano)
-            return;
-
+        if (indice < 0 || indice >= cantidadMano) return;
         cartaSeleccionada = indice;
         OnSeleccionCambio?.Invoke();
     }
 
+    public void JugarSeleccionada()
+    {
+        if (cartaSeleccionada < 0 || cartaSeleccionada >= cantidadMano)
+            return;
+
+        DatosCarta datos = baseDeCartas != null
+            ? baseDeCartas.Obtener(mano[cartaSeleccionada])
+            : null;
+
+        int costo = datos != null ? datos.Costo : 0;
+
+        // Sin energía suficiente, la carta no se juega
+        if (costo > energiaActual)
+            return;
+
+        energiaActual -= costo;
+        DescartarSeleccionada();   // la manda al descarte y avisa a la UI
+        OnEnergiaCambio?.Invoke();
+    }
     public void DescartarSeleccionada()
     {
         if (cartaSeleccionada < 0 ||
@@ -131,8 +143,10 @@ public class GameManager : MonoBehaviour
 
         descarte[cantidadDescarte++] = mano[cartaSeleccionada];
 
-        for (int i = cartaSeleccionada; i < cantidadMano - 1; i++)
-            mano[i] = mano[i + 1];
+        // Shift de la mano usando Array.Copy en lugar de bucle
+        int restantes = cantidadMano - cartaSeleccionada - 1;
+        if (restantes > 0)
+            Array.Copy(mano, cartaSeleccionada + 1, mano, cartaSeleccionada, restantes);
 
         cantidadMano--;
         cartaSeleccionada = -1;
@@ -142,15 +156,15 @@ public class GameManager : MonoBehaviour
 
     public void TerminarRonda()
     {
-        if (cantidadMano == 0)
-            return;
+        if (cantidadMano == 0) return;
 
-        for (int i = 0; i < cantidadMano; i++)
+        int espacio = CantidadDeCartas - cantidadDescarte;
+        int copiar = cantidadMano < espacio ? cantidadMano : espacio;
+
+        if (copiar > 0)
         {
-            if (cantidadDescarte >= CantidadDeCartas)
-                break;
-
-            descarte[cantidadDescarte++] = mano[i];
+            Array.Copy(mano, 0, descarte, cantidadDescarte, copiar);
+            cantidadDescarte += copiar;
         }
 
         cantidadMano = 0;
@@ -158,9 +172,12 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < cartasPorRonda; i++)
         {
-            if (!RobarInterno())
-                break;
+            if (!RobarInterno()) break;
         }
+
+        // Si quieres que la energía se recargue cada ronda, descomenta:
+        // energiaActual = energiaMaxima;
+        // OnEnergiaCambio?.Invoke();
 
         OnManoCambio?.Invoke();
     }
@@ -169,10 +186,6 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(sceneName);
     }
-
-    // ============================================================
-    //  MECÁNICAS INTERNAS
-    // ============================================================
 
     private bool RobarInterno()
     {
@@ -188,12 +201,9 @@ public class GameManager : MonoBehaviour
 
     private void RecuperarDescarte()
     {
-        if (cantidadDescarte == 0)
-            return;
+        if (cantidadDescarte == 0) return;
 
-        for (int i = 0; i < cantidadDescarte; i++)
-            mazo[i] = descarte[i];
-
+        Array.Copy(descarte, 0, mazo, 0, cantidadDescarte);
         cantidadMazo = cantidadDescarte;
         cantidadDescarte = 0;
 
