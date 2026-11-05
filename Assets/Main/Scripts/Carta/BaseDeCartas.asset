@@ -13,258 +13,183 @@ MonoBehaviour:
   m_Name: BaseDeCartas
   m_EditorClassIdentifier: Assembly-CSharp::BaseDeCartas
   cartas:
-  - nombre: 'Blood Armor '
-    tipo: Skill
-    descripcion: 'React.
-
-      Retain.
-
-      Gain 4 block X times.'
+  - nombre: <<BLOOD ARMOR>>
+    tipo: 
+    descripcion: 
     energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
-    copias: x3 choso
-  - nombre: 'Blood Armor '
-    tipo: Skill
-    descripcion: 'React.
-
-      Retain.
-
-      Gain 4 block X times.'
+    copias: 
+  - nombre: <<BLOOD ARMOR>>
+    tipo: 
+    descripcion: 
     energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
-    copias: x3 choso
-  - nombre: 'Blood Armor '
-    tipo: Skill
-    descripcion: 'React.
-
-      Retain.
-
-      Gain 4 block X times.'
+    copias: 
+  - nombre: <<BLOOD ARMOR>>
+    tipo: 
+    descripcion: 
     energia: 3
     fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Blood Edge
-    tipo: Attack
-    descripcion: 'Deal 4 damage.
-
-      Draw 1 card.'
-    energia: 1
+    tipo: 
+    descripcion: 
+    energia: 3
     fondo: {fileID: 1270691643843026252, guid: fb759e700e622ac48a672bb87c1eccca, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Blood Edge
-    tipo: Attack
-    descripcion: 'Deal 4 damage.
-
-      Draw 1 card.'
-    energia: 1
+    tipo: 
+    descripcion: 
+    energia: 3
     fondo: {fileID: 1270691643843026252, guid: fb759e700e622ac48a672bb87c1eccca, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Blood Edge
-    tipo: Attack
-    descripcion: 'Deal 4 damage.
-
-      Draw 1 card.'
-    energia: 1
+    tipo: 
+    descripcion: 
+    energia: 3
     fondo: {fileID: 1270691643843026252, guid: fb759e700e622ac48a672bb87c1eccca, type: 3}
-    copias: x3 choso
-  - nombre: Blood Manipulation
-    tipo: Skill
-    descripcion: 'Choose an effect:
-
-      Put a carrd from your discard pile
-
-      back
-      into your hand.
-
-      Recover 5 health.'
+    copias: 
+  - nombre: Blood manipulation
+    tipo: 
+    descripcion: 
+    energia: 
+    fondo: {fileID: 6093018522410854148, guid: e0b8e08c373fd61459265ebd39c91faa, type: 3}
+    copias: 0
+  - nombre: Blood manipulation
+    tipo: 
+    descripcion: 
     energia: 0
     fondo: {fileID: 6093018522410854148, guid: e0b8e08c373fd61459265ebd39c91faa, type: 3}
-    copias: x2 choso
-  - nombre: Blood Manipulation
-    tipo: Skill
-    descripcion: 'Choose an effect:
-
-      Put a carrd from your discard pile
-
-      back
-      into your hand.
-
-      Recover 5 health.'
-    energia: 0
-    fondo: {fileID: 6093018522410854148, guid: e0b8e08c373fd61459265ebd39c91faa, type: 3}
-    copias: x2 choso
-  - nombre: Blood Meteorite
-    tipo: Attack
-    descripcion: Deal 1 damage for every card in your hand.
+    copias: 
+  - nombre: Blood meteorite
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: -6833665950045163443, guid: 9c8e6160f674cda4086ffff01b920ddd, type: 3}
-    copias: x3 choso
-  - nombre: Blood Meteorite
-    tipo: Attack
-    descripcion: Deal 1 damage for every card in your hand.
+    copias: 
+  - nombre: Blood meteorite
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: -6833665950045163443, guid: 9c8e6160f674cda4086ffff01b920ddd, type: 3}
-    copias: x3 choso
-  - nombre: Blood Meteorite
-    tipo: Attack
-    descripcion: Deal 1 damage for every card in your hand.
+    copias: 
+  - nombre: Blood meteorite
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: -6833665950045163443, guid: 9c8e6160f674cda4086ffff01b920ddd, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Convergence
-    tipo: Power
-    descripcion: "At the end of the round,retain up to \n1 card from your hand. "
-    energia: 1
+    tipo: 
+    descripcion: 
+    energia: 2
     fondo: {fileID: -1893364110441586784, guid: 36847207bac2e5c4982c11d9e6306fc7, type: 3}
-    copias: x2 choso
+    copias: 
   - nombre: Convergence
-    tipo: Power
-    descripcion: "At the end of the round,retain up to \n1 card from your hand. "
-    energia: 1
+    tipo: 
+    descripcion: 
+    energia: 2
     fondo: {fileID: -1893364110441586784, guid: 36847207bac2e5c4982c11d9e6306fc7, type: 3}
-    copias: x2 choso
-  - nombre: 'Cursed womb painting '
-    tipo: Attack
-    descripcion: 'Deal 3 damage 2 times.
-
-      Apply 3 poison. '
+    copias: 
+  - nombre: Cursed Womb Painting
+    tipo: 
+    descripcion: 
+    energia: 
+    fondo: {fileID: -9019386043620898363, guid: 31f7ac59b3233f148bfabe73ef15cade, type: 3}
+    copias: 
+  - nombre: Cursed Womb Painting
+    tipo: 
+    descripcion: 
     energia: 3
     fondo: {fileID: -9019386043620898363, guid: 31f7ac59b3233f148bfabe73ef15cade, type: 3}
-    copias: x2 choso
-  - nombre: 'Cursed womb painting '
-    tipo: Attack
-    descripcion: 'Deal 3 damage 2 times.
-
-      Apply 3 poison. '
-    energia: 3
-    fondo: {fileID: -9019386043620898363, guid: 31f7ac59b3233f148bfabe73ef15cade, type: 3}
-    copias: x2 choso
+    copias: 
+  - nombre: The eldest brother
+    tipo: 
+    descripcion: 
+    energia: 0
+    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
+    copias: 
   - nombre: Flowing Red Scale
-    tipo: Power
-    descripcion: 'whenever you deal damage, apply
-
-      1 posion.'
+    tipo: 
+    descripcion: 
     energia: 2
-    fondo: {fileID: 469845652212413787, guid: 03debfe0073da2b4dbe2024a0bec2a63, type: 3}
-    copias: x2 choso
+    fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
+    copias: 
   - nombre: Flowing Red Scale
-    tipo: Power
-    descripcion: 'whenever you deal damage, apply
-
-      1 posion.'
+    tipo: 
+    descripcion: 
     energia: 2
-    fondo: {fileID: 469845652212413787, guid: 03debfe0073da2b4dbe2024a0bec2a63, type: 3}
-    copias: x2 choso
-  - nombre: Piercing Blood
-    tipo: Attack
-    descripcion: Deal 35 damage.
+    fondo: {fileID: -8728034284175163146, guid: 56108a3f2332f934a9d9617aebdae77b, type: 3}
+    copias: 
+  - nombre: Piercing blood
+    tipo: 
+    descripcion: 
     energia: 5
     fondo: {fileID: -3916888924508500575, guid: 4cd96c8b6c9a56f4fa5170509997e195, type: 3}
-    copias: x2 choso
-  - nombre: Piercing Blood
-    tipo: Attack
-    descripcion: Deal 35 damage.
+    copias: 
+  - nombre: Piercing blood
+    tipo: 
+    descripcion: 
     energia: 5
     fondo: {fileID: -3916888924508500575, guid: 4cd96c8b6c9a56f4fa5170509997e195, type: 3}
-    copias: x2 choso
-  - nombre: The eldest brother
-    tipo: Skill
-    descripcion: 'Gain EC.
-
-      Discard 2 cards.'
-    energia: 0
-    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
-    copias: x3 choso
-  - nombre: The eldest brother
-    tipo: Skill
-    descripcion: 'Gain EC.
-
-      Discard 2 cards.'
-    energia: 0
-    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
-    copias: x3 choso
-  - nombre: The eldest brother
-    tipo: Skill
-    descripcion: 'Gain EC.
-
-      Discard 2 cards.'
-    energia: 0
-    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
-    copias: x3 choso
+    copias: 
+  - nombre: Slicling exorcism
+    tipo: 
+    descripcion: 
+    energia: 
+    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
+    copias: 
+  - nombre: Slicling exorcism
+    tipo: 
+    descripcion: 
+    energia: 
+    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
+    copias: 
+  - nombre: Slicling exorcism
+    tipo: 
+    descripcion: 
+    energia: 
+    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
+    copias: 
   - nombre: Supernova
-    tipo: Power
-    descripcion: 'Whenever an enemy.
-
-      When you deactivate this card, gain
-
-      I
-      EC'
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: 406908281307685806, guid: c2d5108558038aa439ea844f265d5783, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Supernova
-    tipo: Power
-    descripcion: 'Whenever an enemy.
-
-      When you deactivate this card, gain
-
-      I
-      EC'
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: 406908281307685806, guid: c2d5108558038aa439ea844f265d5783, type: 3}
-    copias: x3 choso
+    copias: 
   - nombre: Supernova
-    tipo: Power
-    descripcion: 'Whenever an enemy.
-
-      When you deactivate this card, gain
-
-      I
-      EC'
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: 406908281307685806, guid: c2d5108558038aa439ea844f265d5783, type: 3}
-    copias: x3 choso
-  - nombre: Wing King
-    tipo: Skill
-    descripcion: 'React.
-
-      Gain 5 block
-
-      Draw 2 cards.'
+    copias: 
+  - nombre: The eldest brother
+    tipo: 
+    descripcion: 
+    energia: 0
+    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
+    copias: 
+  - nombre: The eldest brother
+    tipo: 
+    descripcion: 
+    energia: 0
+    fondo: {fileID: 5632422215291016309, guid: 5e1dbc8ce2ae1f847843e76eeef362b3, type: 3}
+    copias: 
+  - nombre: wing king
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: -8848403084311222867, guid: bf3b9a4df750e10468f4d3a1785a7bb0, type: 3}
-    copias: x2 choso
-  - nombre: Wing King
-    tipo: Skill
-    descripcion: 'React.
-
-      Gain 5 block
-
-      Draw 2 cards.'
+    copias: 
+  - nombre: wing king
+    tipo: 
+    descripcion: 
     energia: 1
     fondo: {fileID: -8848403084311222867, guid: bf3b9a4df750e10468f4d3a1785a7bb0, type: 3}
-    copias: x2 choso
-  - nombre: Slicing Exorcism
-    tipo: Skill
-    descripcion: 'Retain
-
-      Apply 3 poison.'
-    energia: 2
-    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
-    copias: x3 choso
-  - nombre: Slicing Exorcism
-    tipo: Skill
-    descripcion: 'Retain
-
-      Apply 3 poison.'
-    energia: 2
-    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
-    copias: x3 choso
-  - nombre: Slicing Exorcism
-    tipo: Skill
-    descripcion: 'Retain
-
-      Apply 3 poison.'
-    energia: 2
-    fondo: {fileID: -2291568249235737099, guid: a0ced0be501358e40a2c61b179d951af, type: 3}
-    copias: x3 choso
+    copias: 
