@@ -5,22 +5,22 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scenes/Player 2 Turn.unity
     guid: 417bb50963d782b40948e859173a39d2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scenes/Player 1 Turn.unity
     guid: 0e0512ee3f7abfa4ab8fbcc598741955
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scenes/Nicolas.unity
     guid: 4fbde5238226a0b44bb69a7920b1313d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scenes/Nico Folder/Scence Credits.unity
     guid: 1fa4c4edacae4d246a2768651e2cd55b
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main/Scenes/Settings.unity
     guid: 2732a24b78dd5644caa233aeb30fe74d
   - enabled: 1
