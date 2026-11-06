@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    private const int CantidadDeCartas = 30;
+
     [Header("Configuración del mazo")]
     [SerializeField] private int cantidadCartasIniciales = 5;
     [SerializeField] private int cartasPorRonda = 5;
@@ -11,8 +13,6 @@ public class GameManager : MonoBehaviour
     [Header("Energía")]
     [SerializeField] private BaseDeCartas baseDeCartas;
     [SerializeField] private int energiaMaxima = 5;
-
-    private const int CantidadDeCartas = 30;
 
     public static GameManager Instance { get; private set; }
 
@@ -23,24 +23,20 @@ public class GameManager : MonoBehaviour
     private readonly int[] mazo = new int[CantidadDeCartas];
     private readonly int[] mano = new int[CantidadDeCartas];
     private readonly int[] descarte = new int[CantidadDeCartas];
-    // Buffer reutilizable para evitar allocations en BarajarTodo
     private readonly int[] bufferBarajar = new int[CantidadDeCartas];
 
-    private int cantidadMazo;
-    private int cantidadMano;
-    private int cantidadDescarte;
+    public int cantidadMazo { get; private set; }
+    public int cantidadMano { get; private set; }
+    public int cantidadDescarte { get; private set; }
+    public int cartaSeleccionada { get; private set; } = -1;
+    public int energiaActual { get; private set; }
 
-    private int cartaSeleccionada = -1;
-    private int energiaActual;
-
-    public int CantidadMazo => cantidadMazo;
-    public int CantidadMano => cantidadMano;
-    public int CantidadDescarte => cantidadDescarte;
-    public int CartaSeleccionada => cartaSeleccionada;
-    public int EnergiaActual => energiaActual;
     public int EnergiaMaxima => energiaMaxima;
 
-    public int IdCartaEnMano(int indice) => mano[indice];
+    public int IdCartaEnMano(int indice)
+    {
+        return mano[indice];
+    }
 
     private void Awake()
     {
@@ -49,18 +45,20 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
     }
 
     private void Start()
     {
-        if (Instance != this) return;
-        IniciarPartida();
+        if (Instance == this)
+            IniciarPartida();
     }
 
     private void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (Instance == this)
+            Instance = null;
     }
 
     public void IniciarPartida()
@@ -77,40 +75,57 @@ public class GameManager : MonoBehaviour
         MezclarMazo();
 
         for (int i = 0; i < cantidadCartasIniciales; i++)
-            RobarInterno();
+        {
+            if (!RobarInterno())
+                break;
+        }
 
         OnManoCambio?.Invoke();
+        OnSeleccionCambio?.Invoke();
         OnEnergiaCambio?.Invoke();
     }
 
     public void BarajarTodo()
     {
-        int total = cantidadMano + cantidadDescarte + cantidadMazo;
+        int totalCartas = cantidadMano + cantidadDescarte + cantidadMazo;
 
-        // Array.Copy es memcpy interno: mucho más rápido que bucles manuales
         Array.Copy(mano, 0, bufferBarajar, 0, cantidadMano);
         Array.Copy(descarte, 0, bufferBarajar, cantidadMano, cantidadDescarte);
-        Array.Copy(mazo, 0, bufferBarajar, cantidadMano + cantidadDescarte, cantidadMazo);
-        Array.Copy(bufferBarajar, 0, mazo, 0, total);
+        Array.Copy(
+            mazo,
+            0,
+            bufferBarajar,
+            cantidadMano + cantidadDescarte,
+            cantidadMazo
+        );
 
-        cantidadMazo = total;
+        Array.Copy(bufferBarajar, 0, mazo, 0, totalCartas);
+
+        cantidadMazo = totalCartas;
         cantidadMano = 0;
         cantidadDescarte = 0;
         cartaSeleccionada = -1;
 
         MezclarMazo();
+
         OnManoCambio?.Invoke();
+        OnSeleccionCambio?.Invoke();
     }
 
     public void RobarCarta()
     {
-        RobarInterno();
-        OnManoCambio?.Invoke();
+        if (RobarInterno())
+            OnManoCambio?.Invoke();
     }
 
     public void SeleccionarCarta(int indice)
     {
-        if (indice < 0 || indice >= cantidadMano) return;
+        if (indice < 0 || indice >= cantidadMano)
+            return;
+
+        if (cartaSeleccionada == indice)
+            return;
+
         cartaSeleccionada = indice;
         OnSeleccionCambio?.Invoke();
     }
@@ -120,66 +135,82 @@ public class GameManager : MonoBehaviour
         if (cartaSeleccionada < 0 || cartaSeleccionada >= cantidadMano)
             return;
 
-        DatosCarta datos = baseDeCartas != null
-            ? baseDeCartas.Obtener(mano[cartaSeleccionada])
-            : null;
-
-        int costo = datos != null ? datos.Costo : 0;
-
-        // Sin energía suficiente, la carta no se juega
-        if (costo > energiaActual)
+        if (baseDeCartas == null)
             return;
 
-        energiaActual -= costo;
-        DescartarSeleccionada();   // la manda al descarte y avisa a la UI
+        DatosCarta datos = baseDeCartas.Obtener(mano[cartaSeleccionada]);
+
+        if (datos == null || datos.Costo > energiaActual)
+            return;
+
+        energiaActual -= datos.Costo;
+        DescartarSeleccionada();
         OnEnergiaCambio?.Invoke();
     }
+
     public void DescartarSeleccionada()
     {
-        if (cartaSeleccionada < 0 ||
-            cartaSeleccionada >= cantidadMano ||
+        int indice = cartaSeleccionada;
+
+        if (indice < 0 ||
+            indice >= cantidadMano ||
             cantidadDescarte >= CantidadDeCartas)
+        {
             return;
+        }
 
-        descarte[cantidadDescarte++] = mano[cartaSeleccionada];
+        descarte[cantidadDescarte] = mano[indice];
+        cantidadDescarte++;
 
-        // Shift de la mano usando Array.Copy en lugar de bucle
-        int restantes = cantidadMano - cartaSeleccionada - 1;
-        if (restantes > 0)
-            Array.Copy(mano, cartaSeleccionada + 1, mano, cartaSeleccionada, restantes);
+        int cartasADesplazar = cantidadMano - indice - 1;
+
+        if (cartasADesplazar > 0)
+        {
+            Array.Copy(
+                mano,
+                indice + 1,
+                mano,
+                indice,
+                cartasADesplazar
+            );
+        }
 
         cantidadMano--;
         cartaSeleccionada = -1;
 
         OnManoCambio?.Invoke();
+        OnSeleccionCambio?.Invoke();
     }
 
     public void TerminarRonda()
     {
-        if (cantidadMano == 0) return;
-
-        int espacio = CantidadDeCartas - cantidadDescarte;
-        int copiar = cantidadMano < espacio ? cantidadMano : espacio;
-
-        if (copiar > 0)
+        if (cantidadMano > 0)
         {
-            Array.Copy(mano, 0, descarte, cantidadDescarte, copiar);
-            cantidadDescarte += copiar;
+            Array.Copy(
+                mano,
+                0,
+                descarte,
+                cantidadDescarte,
+                cantidadMano
+            );
+
+            cantidadDescarte += cantidadMano;
+            cantidadMano = 0;
         }
 
-        cantidadMano = 0;
         cartaSeleccionada = -1;
 
         for (int i = 0; i < cartasPorRonda; i++)
         {
-            if (!RobarInterno()) break;
+            if (!RobarInterno())
+                break;
         }
 
-        // Si quieres que la energía se recargue cada ronda, descomenta:
-        // energiaActual = energiaMaxima;
-        // OnEnergiaCambio?.Invoke();
+        energiaActual = energiaMaxima;
 
         OnManoCambio?.Invoke();
+        OnSeleccionCambio?.Invoke();
+        OnEnergiaCambio?.Invoke();
     }
 
     public void LoadScene(string sceneName)
@@ -187,7 +218,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-    private bool RobarInterno()
+    public bool RobarInterno()
     {
         if (cantidadMazo == 0)
             RecuperarDescarte();
@@ -195,27 +226,34 @@ public class GameManager : MonoBehaviour
         if (cantidadMazo == 0 || cantidadMano >= CantidadDeCartas)
             return false;
 
-        mano[cantidadMano++] = mazo[--cantidadMazo];
+        cantidadMazo--;
+        mano[cantidadMano] = mazo[cantidadMazo];
+        cantidadMano++;
+
         return true;
     }
 
-    private void RecuperarDescarte()
+    public void RecuperarDescarte()
     {
-        if (cantidadDescarte == 0) return;
+        if (cantidadMazo > 0 || cantidadDescarte == 0)
+            return;
 
         Array.Copy(descarte, 0, mazo, 0, cantidadDescarte);
+
         cantidadMazo = cantidadDescarte;
         cantidadDescarte = 0;
 
         MezclarMazo();
     }
 
-    private void MezclarMazo()
+    public void MezclarMazo()
     {
-        for (int i = cantidadMazo - 1; i > 0; i--)
+        for (int indice = cantidadMazo - 1; indice > 0; indice--)
         {
-            int aleatorio = UnityEngine.Random.Range(0, i + 1);
-            (mazo[i], mazo[aleatorio]) = (mazo[aleatorio], mazo[i]);
+            int indiceAleatorio = UnityEngine.Random.Range(0, indice + 1);
+
+            (mazo[indice], mazo[indiceAleatorio]) =
+                (mazo[indiceAleatorio], mazo[indice]);
         }
     }
 }

@@ -9,7 +9,6 @@ public class DatosCarta
     [SerializeField] private string energia;
     [SerializeField] private Sprite fondo;
     [SerializeField] private string copias;
-
     public string Nombre => nombre;
     public string Tipo => tipo;
     public string Descripcion => descripcion;
@@ -18,13 +17,13 @@ public class DatosCarta
     public string Copias => copias;
 
     public int Costo => int.TryParse(energia?.Trim(), out int c) ? Mathf.Max(0, c) : 0;
+
 }
 
 [CreateAssetMenu(fileName = "BaseDeCartas", menuName = "Cartas/Base de cartas")]
 public class BaseDeCartas : ScriptableObject
 {
     [SerializeField] private DatosCarta[] cartas;
-
     // null-conditional + null-coalescing: más limpio y sin allocación
     public int Cantidad => cartas?.Length ?? 0;
 
@@ -35,4 +34,5 @@ public class BaseDeCartas : ScriptableObject
 
         return cartas[id];
     }
+
 }

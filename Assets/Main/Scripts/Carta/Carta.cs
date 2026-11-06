@@ -14,7 +14,6 @@ public class Carta : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Null-conditional: equivalente a "if (ui != null) ui.AlClickear(indice);"
         ui?.AlClickear(indice);
     }
 }
