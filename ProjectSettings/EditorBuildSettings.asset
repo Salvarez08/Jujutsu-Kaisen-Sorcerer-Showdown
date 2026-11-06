@@ -24,7 +24,7 @@ EditorBuildSettings:
     path: Assets/Main/Scenes/Settings.unity
     guid: 2732a24b78dd5644caa233aeb30fe74d
   - enabled: 1
-    path: Assets/Main/Scenes/SegundaEscena.unity
+    path: Assets/Main/Scenes/Orden/Pantalla principal.unity
     guid: fa411f4c7d7b798429e4901316e733da
   - enabled: 1
     path: Assets/Main/Scenes/AmantesDeLosCaballos.unity

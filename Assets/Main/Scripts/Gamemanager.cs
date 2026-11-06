@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+
+  
     private const int CantidadDeCartas = 30;
 
     [Header("Configuración del mazo")]
@@ -51,6 +53,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        if (Instance == this)
+            IniciarPartida();
+
+        Debug.Log($"GameManager activo: {name}, base asignada: {baseDeCartas != null}");
+
         if (Instance == this)
             IniciarPartida();
     }
@@ -256,4 +263,7 @@ public class GameManager : MonoBehaviour
                 (mazo[indiceAleatorio], mazo[indice]);
         }
     }
+
+
 }
+
